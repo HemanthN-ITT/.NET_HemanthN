@@ -1,0 +1,79 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ProblemStatement1_Week1 {
+
+    internal class Program {
+        public static bool isPallindrome(int number) {
+            int temp = number;
+            int reverse = 0;
+            while (temp != 0) {
+                int digit = temp % 10;
+                reverse = reverse * 10 + digit;
+                temp = temp / 10;
+            }
+            if (reverse == number) {
+                return true;
+            }
+            else
+                return false;
+        }
+        public static bool isAnagram(int num1, int num2) {
+            string a=num1.ToString();
+            string b=num2.ToString();
+            char[] char_a=a.ToCharArray();
+            char[] char_b=b.ToCharArray();
+            Array.Sort(char_a);
+            Array.Sort(char_b);
+
+            if (char_a.Length != char_b.Length) {
+                return false;
+            }
+            if (char_a.ToString() == char_b.ToString()) {
+                return true;
+            }
+            else
+                return false;
+        }
+        static int anagramCount(int[] arr) {
+            int count = 0;
+            for (int i = 0; i < arr.Length; i++) {
+                for (int j = i + 1; j < arr.Length; j++) {
+                    if (isAnagram(arr[i], arr[j])) {
+                        count++;
+                    }
+                }
+            }
+            return count;
+        }
+        static int pallindromeCount(int[] arr) {
+            int count = 0;
+            for (int i = 0; i < arr.Length; i++) {
+                if (isPallindrome(arr[i])) {
+                    count++;
+                    //Console.WriteLine($"{arr[i]} is a pallindrome");
+                }
+                    
+            }
+            return count;
+        }
+        static int highestPallindrome(int[] arr) {
+            int highest = 0;
+            for(int i=0;i<arr.Length;i++) {
+                if (isPallindrome(arr[i]) && arr[i]>highest) {
+                    highest= arr[i];
+                }
+            }
+            return highest;
+        }
+        static void Main(string[] args) {
+            int[] numbers = { 12, 21, 121, 131, 211, 44, 101 };
+            Console.WriteLine("Total numbers of Pallindromes: " + pallindromeCount(numbers));
+            Console.WriteLine("Total numbers of Anagrams: "+anagramCount(numbers));
+            Console.WriteLine("Highest Pallindrome: " + highestPallindrome(numbers));
+        }
+    }
+}
