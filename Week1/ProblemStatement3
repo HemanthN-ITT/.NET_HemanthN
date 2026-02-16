@@ -1,0 +1,35 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+/* 
+ Write a program to get the word count in a given sentence and print the each work of the sentence in the reversed order.
+
+Input: My organization name is InTimeTEC.
+
+Output:
+
+The total word count in the given sentence is: 5
+
+The reversed order of the given sentence : ym noitazinagro eman si cetemitni.
+ */
+
+namespace ProblemStatement2_Week2 {
+    internal class Program {
+        static void Main(string[] args) {
+            Console.WriteLine("Enter a sentence");
+            string sentence=Console.ReadLine();
+            string[] words= sentence.Split(' ');
+            string reverse = "";
+            Console.WriteLine("Number of words in the given sentence is: " + words.Length);
+            foreach(string word in  words) {
+                char[] letters= word.ToCharArray();
+                Array.Reverse(letters);
+                string reversed_word=new string(letters);
+                reverse+=reversed_word + " ";
+            }
+            Console.WriteLine("The reversed string is: "+reverse);
+        }
+    }
+}
