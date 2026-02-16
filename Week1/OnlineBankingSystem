@@ -1,0 +1,191 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+
+namespace OnlineBankingSystem {
+    // Transaction Class
+    class Transaction {
+        public DateTime Date;
+        public string Type;
+        public double Amount;
+        public double BalanceAfter;
+    }
+
+    // Bank Account Class
+    class BankAccount {
+        private readonly int accountNumber;
+        private string accountHolder;
+        private double balance;
+        private Transaction[] transactions = new Transaction[100];
+        private int transactionCount = 0;
+        private bool checkBookIssued = false;
+
+        // Constructor
+        public BankAccount(int accNo, string name, double initialBalance) {
+            accountNumber = accNo;
+            accountHolder = name;
+            balance = initialBalance;
+        }
+
+        public int GetAccountNumber() {
+            return accountNumber;
+        }
+
+        public void ShowBalance() {
+            Console.WriteLine("Current Balance: " + balance);
+        }
+
+        public void Deposit(double amount) {
+            balance += amount;
+            AddTransaction("Deposit", amount);
+            Console.WriteLine("Amount Deposited Successfully.");
+        }
+
+        public void Withdraw(double amount) {
+            if (amount <= balance) {
+                balance -= amount;
+                AddTransaction("Withdraw", amount);
+                Console.WriteLine("Amount Withdrawn Successfully.");
+            }
+            else {
+                Console.WriteLine("Insufficient Balance!");
+            }
+        }
+
+        public void Transfer(BankAccount receiver, double amount) {
+            if (amount <= balance) {
+                balance -= amount;
+                receiver.balance += amount;
+
+                AddTransaction("Transfer Sent", amount);
+                receiver.AddTransaction("Transfer Received", amount);
+
+                Console.WriteLine("Transfer Successful.");
+            }
+            else {
+                Console.WriteLine("Insufficient Balance!");
+            }
+        }
+
+        private void AddTransaction(string type, double amount) {
+            if (transactionCount < 100) {
+                transactions[transactionCount] = new Transaction();
+                transactions[transactionCount].Date = DateTime.Now;
+                transactions[transactionCount].Type = type;
+                transactions[transactionCount].Amount = amount;
+                transactions[transactionCount].BalanceAfter = balance;
+                transactionCount++;
+            }
+        }
+
+        public void ShowTransactions() {
+            Console.WriteLine("\n--- Transaction History (Last 1 Year) ---");
+
+            for (int i = 0; i < transactionCount; i++) {
+                if (transactions[i].Date >= DateTime.Now.AddYears(-1)) {
+                    Console.WriteLine(
+                        transactions[i].Date + " | " +
+                        transactions[i].Type + " | " +
+                        transactions[i].Amount + " | Balance: " +
+                        transactions[i].BalanceAfter);
+                }
+            }
+        }
+
+        public void SearchTransaction(string type) {
+            Console.WriteLine("\n--- Search Results ---");
+            for (int i = 0; i < transactionCount; i++) {
+                if (transactions[i].Type.ToLower() == type.ToLower()) {
+                    Console.WriteLine(transactions[i].Date + " | " +
+                                      transactions[i].Type + " | " +
+                                      transactions[i].Amount);
+                }
+            }
+        }
+
+        public void IssueCheckBook() {
+            if (!checkBookIssued) {
+                checkBookIssued = true;
+                Console.WriteLine("Check Book Issued Successfully.");
+            }
+            else {
+                Console.WriteLine("Check Book Already Issued.");
+            }
+        }
+    }
+
+    // Main Program
+    class Program {
+        static void Main(string[] args) {
+            BankAccount acc1 = new BankAccount(101, "John", 5000);
+            BankAccount acc2 = new BankAccount(102, "Smith", 3000);
+
+            int choice;
+
+            do {
+                Console.WriteLine("\n==== ONLINE BANKING SYSTEM ====");
+                Console.WriteLine("1. Check Balance");
+                Console.WriteLine("2. Deposit");
+                Console.WriteLine("3. Withdraw");
+                Console.WriteLine("4. Transfer");
+                Console.WriteLine("5. View Transaction History (1 Year)");
+                Console.WriteLine("6. Search Transaction");
+                Console.WriteLine("7. Issue Check Book");
+                Console.WriteLine("8. Exit");
+                Console.Write("Enter choice: ");
+
+                choice = Convert.ToInt32(Console.ReadLine());
+
+                switch (choice) {
+                    case 1:
+                        acc1.ShowBalance();
+                        break;
+
+                    case 2:
+                        Console.Write("Enter amount to deposit: ");
+                        double dep = Convert.ToDouble(Console.ReadLine());
+                        acc1.Deposit(dep);
+                        break;
+
+                    case 3:
+                        Console.Write("Enter amount to withdraw: ");
+                        double wit = Convert.ToDouble(Console.ReadLine());
+                        acc1.Withdraw(wit);
+                        break;
+
+                    case 4:
+                        Console.Write("Enter amount to transfer to Account 102: ");
+                        double trans = Convert.ToDouble(Console.ReadLine());
+                        acc1.Transfer(acc2, trans);
+                        break;
+
+                    case 5:
+                        acc1.ShowTransactions();
+                        break;
+
+                    case 6:
+                        Console.Write("Enter transaction type (Deposit/Withdraw/Transfer Sent/Transfer Received): ");
+                        string type = Console.ReadLine();
+                        acc1.SearchTransaction(type);
+                        break;
+
+                    case 7:
+                        acc1.IssueCheckBook();
+                        break;
+
+                    case 8:
+                        Console.WriteLine("Thank You!");
+                        break;
+
+                    default:
+                        Console.WriteLine("Invalid Choice!");
+                        break;
+                }
+
+            } while (choice != 8);
+        }
+    }
+}
