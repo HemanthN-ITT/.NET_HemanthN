@@ -1,0 +1,17 @@
+//Write a LINQ query to select all distinct characters from a list of strings and return them in alphabetical order
+
+namespace LINQPS1
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            List<string> stringList = new List<string>{ "Hello", "my", "name", "is", "Hemanth" };
+
+            var distinctCharacters = stringList.SelectMany(s=>s).OrderBy(c=>c);
+            foreach (var distinctCharacter in distinctCharacters) {
+                Console.WriteLine(distinctCharacter);
+            }
+        }
+    }
+}
