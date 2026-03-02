@@ -1,0 +1,32 @@
+//Write a LINQ query to group a list of products by their category, and then calculate the total quantity of each category.
+
+namespace LINQPS3
+{
+    internal class Program
+    {
+        static void Main(string[] args) {
+            List<Product> products = new List<Product>
+            {
+                new Product { Name = "Laptop", Category = "Electronics", Quantity = 5 },
+                new Product { Name = "Phone", Category = "Electronics", Quantity = 8 },
+                new Product { Name = "Shirt", Category = "Clothing", Quantity = 10 },
+                new Product { Name = "Jeans", Category = "Clothing", Quantity = 6 },
+                new Product { Name = "Rice", Category = "Grocery", Quantity = 20 }
+            };
+
+            var categoryProducts = products.GroupBy(p => p.Category).Select(g => new {
+                Category = g.Key,
+                TotalQuantity = g.Sum(p => p.Quantity)
+            });
+
+            foreach (var product in categoryProducts) {
+                Console.WriteLine("Category: " + product.Category + " | Total Quantity: " + product.TotalQuantity);
+            }
+        }
+    }
+    public class Product {
+        public string Name { get; set; }
+        public string Category { get; set; }
+        public int Quantity { get; set; }
+    }
+}
