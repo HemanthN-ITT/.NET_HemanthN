@@ -1,0 +1,27 @@
+//Write a LINQ query to select the nth element from a list of objects, where n is a variable passed to the query.
+
+namespace LINQPS2
+{
+    internal class Program
+    {
+        static void Main(string[] args) {
+            List<Student> students = new List<Student>() {
+                new Student { Id = 1, Name = "Hemanth", Age = 21 },
+                new Student { Id = 2, Name = "Ravi", Age = 22 },
+                new Student { Id = 3, Name = "Priya", Age = 20 }
+            };
+
+            Console.WriteLine($"Enter 1 - {students.Count} to fetch the respective Student Details");
+            int num = Convert.ToInt32(Console.ReadLine());
+
+            var student = students.ElementAtOrDefault(num-1);
+            Console.WriteLine($"Student name: {student.Name}, Student ID: {student.Id}, Student Age: {student.Age}");
+        }
+    }
+
+    public class Student {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Age  { get; set; }
+    }
+}
