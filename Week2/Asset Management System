@@ -1,0 +1,296 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace AssetManagementSystem {
+    abstract class Asset {
+        public int SerialNumber { get; set; }
+        public string Name { get; set; }
+        public abstract void Display();
+    }
+
+    class Book : Asset {
+        public string Author { get; set; }
+        public DateTime DateOfPublish { get; set; }
+
+        public override void Display() {
+            Console.WriteLine($"{SerialNumber}\t{Name}\t{Author}\t{DateOfPublish:dd-MM-yyyy}");
+        }
+    }
+
+    class SoftwareLicense : Asset {
+        public string Vendor { get; set; }
+        public DateTime ExpiryDate { get; set; }
+
+        public override void Display() {
+            Console.WriteLine($"{SerialNumber}\t{Name}\t{Vendor}\t{ExpiryDate:dd-MM-yyyy}");
+        }
+    }
+
+    class Hardware : Asset {
+        public string Manufacturer { get; set; }
+        public string Model { get; set; }
+
+        public override void Display() {
+            Console.WriteLine($"{SerialNumber}\t{Name}\t{Manufacturer}\t{Model}");
+        }
+    }
+
+    class Program {
+        static List<Book> books = new();
+        static List<SoftwareLicense> softwares = new();
+        static List<Hardware> hardwares = new();
+
+        static void Main() {
+            while (true) {
+                Console.WriteLine("\n===== Asset Management System =====");
+                Console.WriteLine("1. Add Asset");
+                Console.WriteLine("2. Search Asset");
+                Console.WriteLine("3. Update Asset");
+                Console.WriteLine("4. Delete Asset");
+                Console.WriteLine("5. List All Assets");
+                Console.WriteLine("6. Exit");
+
+                int choice = ReadInt("Enter choice: ");
+
+                switch (choice) {
+                    case 1: AddAsset(); 
+                        break;
+                    case 2: SearchAsset(); break;
+                    case 3: UpdateAsset(); break;
+                    case 4: DeleteAsset(); break;
+                    case 5: ListAssets(); break;
+                    case 6: return;
+                    default: Console.WriteLine("Invalid choice! Try again."); break;
+                }
+            }
+        }
+
+        // ---> Checking for exact i/o
+
+        static int ReadInt(string message) {
+            int value;
+            while (true) {
+                Console.Write(message);
+                if (int.TryParse(Console.ReadLine(), out value))
+                    return value;
+
+                Console.WriteLine("Invalid number! Please enter a valid integer.");
+            }
+        }
+
+        static DateTime ReadDate(string message) {
+            DateTime date;
+            while (true) {
+                Console.Write(message);
+                if (DateTime.TryParse(Console.ReadLine(), out date))
+                    return date;
+
+                Console.WriteLine("Invalid date format! Please enter valid date (dd-mm-yyyy).");
+            }
+        }
+
+        static string ReadString(string message) {
+            while (true) {
+                Console.Write(message);
+                string input = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(input))
+                    return input.Trim();
+
+                Console.WriteLine("Input cannot be empty!");
+            }
+        }
+
+        // ---> DISPLAY
+
+        static void ListAssets() {
+            Console.WriteLine("\n--- BOOKS ---");
+            Console.WriteLine("Serial\tName\tAuthor\tDate");
+            foreach (var b in books)
+                b.Display();
+
+            Console.WriteLine("\n--- SOFTWARE ---");
+            Console.WriteLine("Serial\tName\tVendor\tExpiry");
+            foreach (var s in softwares)
+                s.Display();
+
+            Console.WriteLine("\n--- HARDWARE ---");
+            Console.WriteLine("Serial\tName\tManufacturer\tModel");
+            foreach (var h in hardwares)
+                h.Display();
+        }
+
+        // --->ADD
+
+        static void AddAsset() {
+            Console.WriteLine("1. Book\n2. Software\n3. Hardware");
+            int type = ReadInt("Select type: ");
+
+            try {
+                switch (type) {
+                    case 1:
+                        books.Add(new Book {
+                            SerialNumber = ReadInt("Serial: "),
+                            Name = ReadString("Name: "),
+                            Author = ReadString("Author: "),
+                            DateOfPublish = ReadDate("Date of Publish: ")
+                        });
+                        break;
+
+                    case 2:
+                        softwares.Add(new SoftwareLicense {
+                            SerialNumber = ReadInt("Serial: "),
+                            Name = ReadString("Name: "),
+                            Vendor = ReadString("Vendor: "),
+                            ExpiryDate = ReadDate("Expiry Date: ")
+                        });
+                        break;
+
+                    case 3:
+                        hardwares.Add(new Hardware {
+                            SerialNumber = ReadInt("Serial: "),
+                            Name = ReadString("Name: "),
+                            Manufacturer = ReadString("Manufacturer: "),
+                            Model = ReadString("Model: ")
+                        });
+                        break;
+
+                    default:
+                        Console.WriteLine("Invalid type selected!");
+                        return;
+                }
+
+                Console.WriteLine("Asset added successfully!");
+            }
+            catch (Exception ex) {
+                Console.WriteLine($"Error occurred: {ex.Message}");
+            }
+        }
+
+        // ---> SEARCH
+
+        static void SearchAsset() {
+            Console.WriteLine("1. Book\n2. Software\n3. Hardware");
+            int type = ReadInt("Select type: ");
+
+            string nameSearch = ReadString("Enter Name to search: ").ToLower();
+
+            switch (type) {
+                case 1:
+                    SearchByName(books, nameSearch);
+                    break;
+                case 2:
+                    SearchByName(softwares, nameSearch);
+                    break;
+                case 3:
+                    SearchByName(hardwares, nameSearch);
+                    break;
+                default:
+                    Console.WriteLine("Invalid type!");
+                    break;
+            }
+        }
+
+        static void SearchByName<T>(List<T> list, string search) where T : Asset {
+            var exactMatch = list.FirstOrDefault(a => a.Name.ToLower() == search);
+
+            if (exactMatch != null) {
+                exactMatch.Display();
+                return;
+            }
+
+            // Partial Matching
+            var partialMatches = list
+                .Where(a => a.Name.ToLower().Contains(search.ToLower()))
+                .ToList();
+
+            if (partialMatches.Any()) {
+                Console.WriteLine("Partial match found:");
+                foreach (var item in partialMatches)
+                    item.Display();
+                return;
+            }
+
+            // Suggesting closest match
+            var suggestion = list
+                .OrderBy(a => SimpleSimilarity(a.Name.ToLower(), search.ToLower()))
+                .First();
+
+            Console.WriteLine("No exact match found.");
+            Console.WriteLine($"Did you mean: {suggestion.Name} ?");
+        }
+
+        // --->UPDATE
+
+        static void UpdateAsset() {
+            Console.WriteLine("1. Book\n2. Software\n3. Hardware");
+            int type = ReadInt("Select type: ");
+            int id = ReadInt("Enter Serial Number: ");
+
+            switch (type) {
+                case 1:
+                    var book = books.FirstOrDefault(b => b.SerialNumber == id);
+                    if (book != null) {
+                        book.Name = ReadString("New Name: ");
+                        book.Author = ReadString("New Author: ");
+                        book.DateOfPublish = ReadDate("New Date: ");
+                        Console.WriteLine("Updated successfully!");
+                    }
+                    else Console.WriteLine("Book not found!");
+                    break;
+
+                case 2:
+                    var software = softwares.FirstOrDefault(s => s.SerialNumber == id);
+                    if (software != null) {
+                        software.Name = ReadString("New Name: ");
+                        software.Vendor = ReadString("New Vendor: ");
+                        software.ExpiryDate = ReadDate("New Expiry Date: ");
+                        Console.WriteLine("Updated successfully!");
+                    }
+                    else Console.WriteLine("Software not found!");
+                    break;
+
+                case 3:
+                    var hardware = hardwares.FirstOrDefault(h => h.SerialNumber == id);
+                    if (hardware != null) {
+                        hardware.Name = ReadString("New Name: ");
+                        hardware.Manufacturer = ReadString("New Manufacturer: ");
+                        hardware.Model = ReadString("New Model: ");
+                        Console.WriteLine("Updated successfully!");
+                    }
+                    else Console.WriteLine("Hardware not found!");
+                    break;
+            }
+        }
+
+        // --->DELETE
+
+        static void DeleteAsset() {
+            Console.WriteLine("1. Book\n2. Software\n3. Hardware");
+            int type = ReadInt("Select type: ");
+            int id = ReadInt("Enter Serial Number: ");
+
+            bool removed = type switch {
+                1 => books.RemoveAll(b => b.SerialNumber == id) > 0,
+                2 => softwares.RemoveAll(s => s.SerialNumber == id) > 0,
+                3 => hardwares.RemoveAll(h => h.SerialNumber == id) > 0,
+                _ => false
+            };
+
+            Console.WriteLine(removed ? "Deleted successfully!" : "Asset not found!");
+        }
+
+        static int SimpleSimilarity(string s1, string s2) {
+            int matches = 0;
+            int length = Math.Min(s1.Length, s2.Length);
+
+            for (int i = 0; i < length; i++) {
+                if (s1[i] == s2[i])
+                    matches++;
+            }
+
+            // Lower value means more similar (so we subtract)
+            return length - matches;
+        }
+    }
+}
